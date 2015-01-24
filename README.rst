@@ -3,6 +3,8 @@ Web-Standard-Apps Command Line Tool
 
 Command line tool to generate basic folder, file structure for a WSA module.
 
+https://github.com/GannettDigital/web-standard-apps
+
 Requirements
 ------------
 
