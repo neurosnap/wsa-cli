@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import os
 import sys
 import json
@@ -93,6 +94,9 @@ def mkwsa(dir, name, js, css, config_version, template, force):
     create_json(site_config_file, default_siteconfig)
 
 def create_dir(directory):
+    """ Create directory or display message if directory already exists
+
+    :param director: The directory """
     if os.path.isdir(directory):
         click.echo("Found {}, skipping folder creation".format(directory))
     else:
