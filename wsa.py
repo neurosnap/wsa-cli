@@ -1,14 +1,19 @@
 # -*- coding: utf8 -*-
+from __future__ import print_function
+
 import os
 import sys
 import json
 
+import six
 import click
 
 default_siteconfig = {
     "version": 2,
     "siteModules": {}
 }
+
+DIR = os.path.dirname(os.path.realpath(__file__))
 
 @click.command()
 @click.option('--dir', default=os.getcwd(), prompt='Enter directory to create web-standard-app module',
@@ -57,6 +62,21 @@ def mkwsa(dir, name, js, css, config_version, template, force):
         # create base module folder
         os.mkdir(module_dir)
 
+    # setup python package
+    click.echo("Creating __init__.py file ...")
+    with open(os.path.join(module_dir, "__init__.py"), 'wb') as fp:
+        output = "# -*- coding: utf-8 -*-"
+        content = six.u(output)
+        fp.write(content)
+
+    click.echo("Creating modules.py file in {} ...".format(module_dir))
+    with open(os.path.join(DIR, "defaults/modules.py"), 'rb') as fp:
+        content = fp.read()
+        content = content.format(name=name)
+        data = six.u(content)
+        with open(os.path.join(module_dir, "modules.py"), 'wb') as fp_new:
+            fp_new.write(data)
+
     # setup template folder structure and default template
     create_dir(template_dir)
     create_dir(template_module_dir)
@@ -65,7 +85,7 @@ def mkwsa(dir, name, js, css, config_version, template, force):
     click.echo("Creating {}.html file in {} ...".format(template_module_file, template_module_name_dir))
     with open("{}.html".format(template_module_file), 'wb') as fp:
         output = '<div class="{}-container"></div>'.format(name)
-        content = bytes(output, 'UTF-8')
+        content = six.u(output)
         fp.write(content)
 
     # setup static folder structure and config files
@@ -82,11 +102,22 @@ def mkwsa(dir, name, js, css, config_version, template, force):
     # create js modules directory and templated js file
     if js:
         create_dir(js_modules_dir)
+        click.echo("Creating {}.js file in {} ...".format(name, js_modules_dir))
+        with open(os.path.join(DIR, "defaults/template.js"), 'rb') as fp:
+            content = fp.read()
+            data = six.u(content)
+            with open(os.path.join(js_modules_dir, "{}.js".format(name)), 'wb') as fp_new:
+                fp_new.write(data)
         default_siteconfig['siteModules']['path'] = "{}/{}".format(js_modules, name)
 
     # create css modules directory and templated css file
     if css:
         create_dir(css_modules_dir)
+        click.echo("Creating {}.css file in {} ...".format(name, css_modules_dir))
+        with open(os.path.join(css_modules_dir, "{}.css".format(name)), 'wb') as fp:
+            output = '.{}-container {}'.format(name, "{}")
+            content = six.u(output)
+            fp.write(content)
         default_siteconfig['siteModules']['css'] = "{}/{}".format(css_modules, name)
 
     click.echo("Creating {}-siteconfig.json file in {} ..." \
