@@ -29,11 +29,15 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 @click.option('--config-version', default=2, prompt='Config version',
               help="This option sets the version for siteconfig.json")
 @click.option('--template', default='primary', prompt='Template type', help='The type of template')
+@click.option('--manifest/--no-manifest', default=False,
+              prompt='Do you want to append the MANIFEST.in file?',
+              help='This option appends a MANIFEST.in file with the assets for the module')
 @click.option('--force', is_flag=True, default=False,
               help='This option will force the script to overwrite a currently existing module setup if the directory already exists')
-def mkwsa(dir, name, js, css, config_version, template, force):
+def mkwsa(dir, name, js, css, config_version, template, manifest, force):
     """ Command line template for creating a basic web-standard-apps module """
     module_dir = os.path.join(dir, name)
+    parent_dir = os.path.abspath(os.path.join(module_dir, os.pardir))
 
     static_dir = os.path.join(module_dir, "static")
     css_dir = os.path.join(static_dir, "css")
@@ -108,7 +112,7 @@ def mkwsa(dir, name, js, css, config_version, template, force):
             data = six.u(content)
             with open(os.path.join(js_modules_dir, "{}.js".format(name)), 'wb') as fp_new:
                 fp_new.write(data)
-        default_siteconfig['siteModules']['path'] = "{}/{}".format(js_modules, name)
+        default_siteconfig['siteModules'][name]['path'] = "{}/{}".format(js_modules, name)
 
     # create css modules directory and templated css file
     if css:
@@ -118,11 +122,33 @@ def mkwsa(dir, name, js, css, config_version, template, force):
             output = '.{}-container {}'.format(name, "{}")
             content = six.u(output)
             fp.write(content)
-        default_siteconfig['siteModules']['css'] = "{}/{}".format(css_modules, name)
+        default_siteconfig['siteModules'][name]['css'] = "{}/{}".format(css_modules, name)
 
     click.echo("Creating {}-siteconfig.json file in {} ..." \
                .format(name, site_config_module_dir))
     create_json(site_config_file, default_siteconfig)
+
+    if manifest:
+        append_manifest(parent_dir, module_dir, name)
+
+    click.echo("---------------------------------\n")
+    click.echo("Successfully installed {} module!".format(name))
+    click.echo("Next steps:")
+    click.echo("\t1.) Add {} to INSTALLED_APPS in uscp-web/uscp-web/settings/base.py".format(name))
+    click.echo("\t2.) Create module in PRESTO")
+    click.echo("\t3.) Add module to layout of choice")
+
+def append_manifest(parent_dir, module_dir, name):
+    manifest_file = os.path.join(parent_dir, "MANIFEST.in")
+    templates = "\nrecursive-include {}/templates *\n".format(name)
+    static = "recursive-include {}/static *".format(name)
+    if os.path.isfile(manifest_file):
+        with open(manifest_file, "a") as fp:
+            fp.write(templates)
+            fp.write(static)
+        click.echo("Appended MANIFEST.in file in {}".format(parent_dir))
+    else:
+        click.echo("Could not find MANIFEST.in file ... ignoring")
 
 def create_dir(directory):
     """ Create directory or display message if directory already exists
