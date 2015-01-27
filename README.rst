@@ -8,7 +8,7 @@ https://github.com/GannettDigital/web-standard-apps
 Requirements
 ------------
 
-* Python 2.7 - Python 3.4
+* Python 2.7, Python 3.4
 
 Install
 -------
