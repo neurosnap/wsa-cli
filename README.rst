@@ -36,6 +36,16 @@ For help
 
     mkwsa --help
 
+TO DO
+-----
+
+* Create model.py
+* Create views.py
+* Create urls.py
+* Create default tests
+* Create tests for wsa-cli
+* Create default HTML templates for different module types
+
 Credits
 -------
 
