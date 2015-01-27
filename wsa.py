@@ -1,6 +1,8 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
 
+__version__ = '0.0.2'
+
 import os
 import sys
 import json
